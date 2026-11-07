@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NikeBoss Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NikeBoss</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
         body {
             background: #0a0a0f;
             color: #e6e6f0;
@@ -14,68 +14,71 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-        .logo {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(90deg, #ff2b6b, #7a2bff, #2b8bff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 20px rgba(122, 43, 255, 0.5);
-            margin-bottom: 40px;
-            letter-spacing: 2px;
-        }
-        .search-box {
-            width: 80%;
-            max-width: 500px;
-            position: relative;
-        }
-        .search-box input {
+        .search-wrapper {
             width: 100%;
-            padding: 16px 20px;
-            border-radius: 12px;
+            max-width: 600px;
+            display: flex;
             background: #12121a;
             border: 2px solid #22223a;
-            color: #fff;
-            font-size: 18px;
-            outline: none;
+            border-radius: 24px;
+            padding: 8px;
             transition: all 0.3s;
         }
-        .search-box input:focus {
+        .search-wrapper:focus-within {
             border-color: #7a2bff;
-            box-shadow: 0 0 20px rgba(122, 43, 255, 0.6);
+            box-shadow: 0 0 20px rgba(122, 43, 255, 0.5);
         }
-        .search-box button {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            bottom: 10px;
-            background: linear-gradient(135deg, #ff2b6b, #7a2bff);
+        .search-wrapper input {
+            flex: 1;
+            background: transparent;
             border: none;
-            border-radius: 8px;
-            color: white;
-            padding: 0 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 43, 107, 0.6);
+            color: #fff;
+            font-size: 16px;
+            padding: 10px 16px;
+            outline: none;
         }
-        .search-box button:active { transform: scale(0.95); }
+        .search-wrapper input::placeholder { color: #5a5a75; }
+        .btn {
+            background: #1a1a26;
+            border: none;
+            border-radius: 16px;
+            color: #e6e6f0;
+            padding: 0 16px;
+            font-weight: 600;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-ai {
+            background: linear-gradient(135deg, #ff2b6b, #7a2bff);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 43, 107, 0.4);
+        }
     </style>
 </head>
 <body>
-    <div class="logo">NikeBoss</div>
-    <div class="search-box">
-        <input type="text" id="q" placeholder="Поиск в Brave..." autocomplete="off">
-        <button onclick="search()">Найти</button>
+    <div class="search-wrapper">
+        <input type="text" id="q" placeholder="Поиск в NikeBoss..." autocomplete="off">
+        <button class="btn" onclick="searchWeb()">Найти</button>
+        <button class="btn btn-ai" onclick="searchAI()">AI</button>
     </div>
+
     <script>
-        function search() {
+        function searchWeb() {
             const q = document.getElementById('q').value.trim();
+            if (!q) return;
             window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(q);
         }
+        function searchAI() {
+            const q = document.getElementById('q').value.trim();
+            if (!q) return;
+            alert('NikeBoss AI скоро проснется! (Ожидаем подключение API)');
+        }
         document.getElementById('q').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') search();
+            if (e.key === 'Enter') searchWeb();
         });
     </script>
 </body>

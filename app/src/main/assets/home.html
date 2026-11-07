@@ -7,68 +7,49 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, 'Segoe UI', system-ui, sans-serif; }
         body {
-            background: #0a0a0f;
-            color: #e6e6f0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 120px; /* Поднимаем поиск выше */
+            background: #0a0a0f; color: #e6e6f0;
+            height: 100vh; display: flex; flex-direction: column; align-items: center;
+            padding-top: 120px; transition: all 0.3s ease;
         }
         .logo {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: 1px;
+            font-size: 24px; font-weight: 700; letter-spacing: 1px;
             background: linear-gradient(90deg, #ff2b6b, #7a2bff, #2b8bff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 30px;
-            text-shadow: 0 0 15px rgba(122, 43, 255, 0.3);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            margin-bottom: 30px; text-shadow: 0 0 15px rgba(122, 43, 255, 0.3);
         }
         .search-wrapper {
-            width: 90%;
-            max-width: 600px;
-            display: flex;
-            background: #12121a;
-            border: 2px solid #22223a;
-            border-radius: 24px;
-            padding: 6px;
-            transition: all 0.33;
+            width: 90%; max-width: 600px; display: flex;
+            background: #12121a; border: 2px solid #22223a; border-radius: 24px; padding: 6px;
+            transition: all 0.3s; z-index: 10;
         }
         .search-wrapper:focus-within {
-            border-color: #7a2bff;
-            box-shadow: 0 0 20px rgba(122, 43, 255, 0.5);
+            border-color: #7a2bff; box-shadow: 0 0 20px rgba(122, 43, 255, 0.5);
         }
         .search-wrapper input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 16px;
-            padding: 10px 16px;
-            outline: none;
+            flex: 1; background: transparent; border: none; color: #fff;
+            font-size: 16px; padding: 10px 16px; outline: none;
         }
         .search-wrapper input::placeholder { color: #5a5a75; }
         .btn {
-            background: #1a1a26;
-            border: none;
-            border-radius: 16px;
-            color: #e6e6f0;
-            padding: 0 16px;
-            font-weight: 600;
-            margin-left: 4px;
-            cursor: pointer;
+            background: #1a1a26; border: none; border-radius: 16px; color: #e6e6f0;
+            padding: 0 16px; font-weight: 600; margin-left: 4px; cursor: pointer;
             transition: all 0.2s;
         }
         .btn:active { transform: scale(0.95); }
         .btn-ai {
             background: linear-gradient(135deg, #ff2b6b, #7a2bff);
-            color: white;
-            box-shadow: 0 0 10px rgba(255, 43, 107, 0.4);
-            font-size: 12px;
-            padding: 0 12px;
+            color: white; box-shadow: 0 0 10px rgba(255, 43, 107, 0.4);
+            font-size: 12px; padding: 0 12px;
         }
+        #ai-result {
+            display: none; width: 90%; max-width: 600px;
+            margin-top: 20px; background: #12121a; border: 1px solid #7a2bff;
+            border-radius: 16px; padding: 16px; color: #e6e6f0; font-size: 14px;
+            line-height: 1.5; box-shadow: 0 0 20px rgba(122, 43, 255, 0.2);
+            max-height: 60vh; overflow-y: auto;
+        }
+        #ai-result.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -79,17 +60,39 @@
         <button class="btn btn-ai" onclick="searchAI()">AI</button>
     </div>
 
+    <div id="ai-result"></div>
+
     <script>
         function searchWeb() {
             const q = document.getElementById('q').value.trim();
             if (!q) return;
-            window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+            if (q.includes('.') && !q.includes(' ')) {
+                window.location.href = 'https://' + q;
+            } else {
+                window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+            }
         }
+
         function searchAI() {
             const q = document.getElementById('q').value.trim();
             if (!q) return;
-            alert('NikeBoss AI скоро проснется!');
+            
+            const resultDiv = document.getElementById('ai-result');
+            resultDiv.innerHTML = 'Nova думает...';
+            resultDiv.classList.add('show');
+            
+            // Вызов моста ко Нове
+            if (window.NikeBossAI) {
+                // Не все в одном потоке. Даем короткую задержку
+                setTimeout(() => {
+                    const answer = window.NikeBossAI.ask(q);
+                    resultDiv.innerHTML = answer;
+                }, 50);
+            } else {
+                resultDiv.innerHTML = 'Ошибка: Мост AI не найден.';
+            }
         }
+
         document.getElementById('q').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') searchWeb();
         });

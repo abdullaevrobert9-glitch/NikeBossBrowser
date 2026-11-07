@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    buildFeatures { buildConfig true }
     namespace 'com.nikeboss.browser'
     compileSdk 34
 

@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidz.swiperefreshlayout.widget.SwipeRefreshLayout
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Делаем на всю конечную строку
         window.setFlags(
             android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -30,6 +29,9 @@ class MainActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webView)
         swipeRefresh = findViewById(R.id.swipeRefresh)
+
+        // Подключаем мост ко Нове
+        webView.addJavaScriptInterface(AIBridge(), "NikeBossAI")
 
         webView.settings.apply {
             javaScriptEnabled = true
@@ -45,12 +47,6 @@ class MainActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 swipeRefresh.isRefreshing = false
-                
-                if (url?.contains("file:///android_asset/home.html") == true) {
-                } else {
-                }
-                
-                // Автозаполнение логина
                 if (url != null) {
                     tryAutofillLogin(url)
                 }
@@ -58,23 +54,48 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.loadUrl("file:///android_asset/home.html")
+    }
 
-            if (input.isNotEmpty()) {
-                val url = when {
-                    input.startsWith("http") -> input
-                    input.contains(".") && !input.contains(" ") -> "https://$input"
-                    else -> "https://www.google.com/search?q=${java.net.URLEncoder.encode(input, "UTF-8")}"
+    // Мост ко Нове (Groq)
+    inner class AIBridge {
+        @JavascriptInterface
+        fun ask(prompt: String): String {
+            return try {
+                val url = java.net.URL("https://api.groq.com/openai/v1/chat/completions")
+                val conn = url.openConnection() as java.net.HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.setRequestProperty("Authorization", "Bearer " + BuildConfig.GROQ_API_KEY)
+                conn.doOutput = true
+
+                val jsonInputString = """
+                    {
+                        "model": "llama3-8b-8192",
+                        "messages": [{"role": "user", "content": "${prompt.replace("\"", "\\\"")}"}]
+                    }
+                """.trimIndent()
+
+                conn.outputStream.use { os ->
+                    val input = jsonInputString.toByteArray(charset("utf-8"))
+                    os.write(input, 0, input.size)
                 }
-                webView.loadUrl(url)
+
+                if (conn.responseCode == 200) {
+                    val response = conn.inputStream.bufferedReader().readText()
+                    val json = JSONObject(response)
+                    json.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content")
+                } else {
+                    "Ошибка API: ${conn.responseCode}"
+                }
+            } catch (e): Exception {
+                "Ошибка: ${e.message}"
             }
-            true
         }
     }
 
     private fun tryAutofillLogin(url: String) {
         val host = android.net.Uri.parse(url).host?.removePrefix("www.") ?: return
         val saved = store.getLogin(host) ?: return
-
         val js = """
             (function() {
                 var v = ${escapeJs(saved)};

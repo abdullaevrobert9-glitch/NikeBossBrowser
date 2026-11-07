@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NikeBoss Search</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
+            background: #0a0a0f;
+            color: #e6e6f0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff2b6b, #7a2bff, #2b8bff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(122, 43, 255, 0.5);
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+        .search-box {
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: #12121a;
+            border: 2px solid #22223a;
+            color: #fff;
+            font-size: 18px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-box input:focus {
+            border-color: #7a2bff;
+            box-shadow: 0 0 20px rgba(122, 43, 255, 0.6);
+        }
+        .search-box button {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            bottom: 10px;
+            background: linear-gradient(135deg, #ff2b6b, #7a2bff);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 43, 107, 0.6);
+        }
+        .search-box button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <div class="logo">NikeBoss</div>
+    <div class="search-box">
+        <input type="text" id="q" placeholder="Поиск в Brave..." autocomplete="off">
+        <button onclick="search()">Найти</button>
+    </div>
+    <script>
+        function search() {
+            const q = document.getElementById('q').value.trim();
+            window.location.href = 'https://www.google.com/search?q=' + encodeURIComponent(q);
+        }
+        document.getElementById('q').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+</body>
+</html>

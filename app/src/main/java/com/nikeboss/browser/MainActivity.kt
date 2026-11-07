@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        webView.loadUrl("https://www.google.com")
+        webView.loadUrl("file:///android_asset/home.html")
 
         btnBack.setOnClickListener { if (webView.canGoBack()) webView.goBack() }
         btnForward.setOnClickListener { if (webView.canGoForward()) webView.goForward() }

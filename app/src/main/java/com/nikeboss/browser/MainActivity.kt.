@@ -1,0 +1,126 @@
+package com.nikeboss.browser
+
+import android.annotation.SuppressLint
+import android.os.Bundle
+import android.view.View
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+import androidz.swiperefreshlayout.widget.SwipeRefreshLayout
+import org.json.JSONObject
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var webView: WebView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var store: CredentialsStore
+
+    @SuppressLint("SetJavaScriptEnabled")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        window.setFlags(
+            android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
+
+        setContentView(R.layout.activity_main)
+        store = CredentialsStore(this)
+
+        webView = findViewById(R.id.webView)
+        swipeRefresh = findViewById(R.id.swipeRefresh)
+
+        // Подключаем мост ко Нове
+        webView.addJavaScriptInterface(AIBridge(), "NikeBossAI")
+
+        webView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            setSupportZoom(true)
+        }
+
+        swipeRefresh.setOnRefreshListener { webView.reload() }
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                swipeRefresh.isRefreshing = false
+                if (url != null) {
+                    tryAutofillLogin(url)
+                }
+            }
+        }
+
+        webView.loadUrl("file:///android_asset/home.html")
+    }
+
+    // Мост ко Нове (Groq)
+    inner class AIBridge {
+        @JavascriptInterface
+        fun ask(prompt: String): String {
+            return try {
+                val url = java.net.URL("https://api.groq.com/openai/v1/chat/completions")
+                val conn = url.openConnection() as java.net.HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.setRequestProperty("Authorization", "Bearer " + BuildConfig.GROQ_API_KEY)
+                conn.doOutput = true
+
+                val jsonInputString = """
+                    {
+                        "model": "llama3-8b-8192",
+                        "messages": [{"role": "user", "content": "${prompt.replace("\"", "\\\"")}"}]
+                    }
+                """.trimIndent()
+
+                conn.outputStream.use { os ->
+                    val input = jsonInputString.toByteArray(charset("utf-8"))
+                    os.write(input, 0, input.size)
+                }
+
+                if (conn.responseCode == 200) {
+                    val response = conn.inputStream.bufferedReader().readText()
+                    val json = JSONObject(response)
+                    json.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content")
+                } else {
+                    "Ошибка API: ${conn.responseCode}"
+                }
+            } catch (e): Exception {
+                "Ошибка: ${e.message}"
+            }
+        }
+    }
+
+    private fun tryAutofillLogin(url: String) {
+        val host = android.net.Uri.parse(url).host?.removePrefix("www.") ?: return
+        val saved = store.getLogin(host) ?: return
+        val js = """
+            (function() {
+                var v = ${escapeJs(saved)};
+                var inputs = document.querySelectorAll('input[type="email"], input[type="text"], input[name*="login"], input[name*="email"], input[name*="user"]');
+                for (var i = 0; i <inputs.length; i++) {
+                    var el = inputs[i];
+                    if (el.offsetParent === null) continue;
+                    if (el.value && el.value.length > 0) continue;
+                    el.focus();
+                    el.value = v;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                    return true;
+                }
+                return false;
+            })();
+        """.trimIndent()
+        webView.evaluateJavascript(js, null)
+    }
+
+    private fun escapeJs(s: String): String =
+        "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\""
+
+    override fun onBackPressed() {
+        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+    }
+}

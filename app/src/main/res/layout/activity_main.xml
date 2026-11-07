@@ -50,6 +50,7 @@
             android:inputType="textUri" />
     </LinearLayout>
 
+    <Button android:id="@+id/btnSaveLogin" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Сохранить" android:textSize="12sp" android:textColor="#ff2b6b" android:backgroundTint="#1a1a26" android:layout_marginStart="8dp" />
     <WebView android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -20,11 +20,33 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      # Генерируем ключ, если его еще нет
+      - name: Generate Keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore app/release.jks \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -alias nikeboss \
+            -storepass nikeboss123 -keypass nikeboss123 \
+            -dname "CN=NikeBoss, OU=Dev, O=NikeBoss, L=Moscow, S=Moscow, C=RU"
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_FILE: release.jks
+          KEYSTORE_PASSWORD: nikeboss123
+          KEY_ALIAS: nikeboss
+          KEY_PASSWORD: nikeboss123
+        run: ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: nikeboss-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: nikeboss-release
+          path: app/build/outputs/apk/release/app-release.apk
+
+      # Сохраняем ключ, чтобы ты мог его скачать!
+      - name: Upload Keystore
+        uses: actions/upload-artifact@v4
+        with:
+          name: nikeboss-keystore
+          path: app/release.jks

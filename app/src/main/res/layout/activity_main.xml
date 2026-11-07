@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0a0a0f">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#12121a">
+
+        <Button android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="‹"
+            android:textColor="#e6e6f0"
+            android:backgroundTint="#1a1a26" />
+
+        <Button android:id="@+id/btnForward"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="›"
+            android:textColor="#e6e6f0"
+            android:backgroundTint="#1a1a26"
+            android:layout_marginStart="4dp" />
+
+        <Button android:id="@+id/btnReload"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:text="⟳"
+            android:textColor="#e6e6f0"
+            android:backgroundTint="#1a1a26"
+            android:layout_marginStart="4dp" />
+
+        <EditText android:id="@+id/etUrl"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:hint="Поиск или адрес"
+            android:textColorHint="#5a5a75"
+            android:textColor="#e6e6f0"
+            android:background="#0f0f18"
+            android:padding="12dp"
+            android:singleLine="true"
+            android:imeOptions="actionGo"
+            android:inputType="textUri" />
+    </LinearLayout>
+
+    <WebView android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

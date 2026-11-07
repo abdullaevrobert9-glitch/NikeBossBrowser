@@ -12,7 +12,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private lateinit var etUrl: EditText
     private lateinit var swipeRefresh: SwipeRefreshLayout
     private lateinit var store: CredentialsStore
 
@@ -30,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         store = CredentialsStore(this)
 
         webView = findViewById(R.id.webView)
-        etUrl = findViewById(R.id.etUrl)
         swipeRefresh = findViewById(R.id.swipeRefresh)
 
         webView.settings.apply {
@@ -49,9 +47,7 @@ class MainActivity : AppCompatActivity() {
                 swipeRefresh.isRefreshing = false
                 
                 if (url?.contains("file:///android_asset/home.html") == true) {
-                    etUrl.setText("")
                 } else {
-                    etUrl.setText(url)
                 }
                 
                 // Автозаполнение логина
@@ -63,8 +59,6 @@ class MainActivity : AppCompatActivity() {
 
         webView.loadUrl("file:///android_asset/home.html")
 
-        etUrl.setOnEditorActionListener { _, _, _n ->
-            val input = etUrl.text.toString().trim()
             if (input.isNotEmpty()) {
                 val url = when {
                     input.startsWith("http") -> input

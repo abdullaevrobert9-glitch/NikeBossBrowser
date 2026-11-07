@@ -3,10 +3,11 @@ package com.nikeboss.browser
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import androidz.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
@@ -30,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         webView = findViewById(R.id.webView)
         swipeRefresh = findViewById(R.id.swipeRefresh)
 
-        // Подключаем мост ко Нове
-        webView.addJavaScriptInterface(AIBridge(), "NikeBossAI")
+        // Подключаем мост к Нове
+        webView.addJavascriptInterface(AIBridge(), "NikeBossAI")
 
         webView.settings.apply {
             javaScriptEnabled = true
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("file:///android_asset/home.html")
     }
 
-    // Мост ко Нове (Groq)
+    // Мост к Нове (Groq)
     inner class AIBridge {
         @JavascriptInterface
         fun ask(prompt: String): String {
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     "Ошибка API: ${conn.responseCode}"
                 }
-            } catch (e): Exception {
+            } catch (e: Exception) {
                 "Ошибка: ${e.message}"
             }
         }
@@ -96,11 +97,12 @@ class MainActivity : AppCompatActivity() {
     private fun tryAutofillLogin(url: String) {
         val host = android.net.Uri.parse(url).host?.removePrefix("www.") ?: return
         val saved = store.getLogin(host) ?: return
+
         val js = """
             (function() {
                 var v = ${escapeJs(saved)};
                 var inputs = document.querySelectorAll('input[type="email"], input[type="text"], input[name*="login"], input[name*="email"], input[name*="user"]');
-                for (var i = 0; i <inputs.length; i++) {
+                for (var i = 0; i < inputs.length; i++) {
                     var el = inputs[i];
                     if (el.offsetParent === null) continue;
                     if (el.value && el.value.length > 0) continue;
